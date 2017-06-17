@@ -39,16 +39,19 @@ def run_monitoring_tool():
 
         for i, rig_name_to_monitor in enumerate(rig_names_to_monitor):
             if rig_name_to_monitor not in connected_rig_names:
+                logger.debug('{} is down.'.format(rig_name_to_monitor))
                 rig_statuses[i] = False
-
-                # we notify when there is a change in the status. Not every time we pull from the API.
-                if previous_rig_statuses[i] != rig_statuses[i]:
+                if previous_rig_statuses[i] is True:
                     email_sender.send_email(email_subject='Host not connected',
-                                            email_content='[{}] appears not to be connected. Please check.'.format(
+                                            email_content='[{}] is down. Please check.'.format(
                                                 rig_name_to_monitor))
             else:
                 logger.debug('{} is connected.'.format(rig_name_to_monitor))
                 rig_statuses[i] = True
+                if previous_rig_statuses[i] is False:
+                    email_sender.send_email(email_subject='Host successfully connected',
+                                            email_content='[{}] appears to be connected. Congrats.'.format(
+                                                rig_name_to_monitor))
 
         previous_rig_statuses = list(rig_statuses)
         logger.debug('Going to sleep for {} seconds.'.format(polling_interval_sec))
