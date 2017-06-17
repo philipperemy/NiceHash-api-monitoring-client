@@ -1,8 +1,9 @@
 {
   "MAIL": {
     "GMAIL_USERNAME": "steve.jobs",
-  "GMAIL_PASSWORD": "iloveapple",
-  "NOTIFICATION_EMAIL": "steve.jobs@gmail.com"
+    "GMAIL_PASSWORD": "iloveapple",
+    "NOTIFICATION_EMAIL": "steve.jobs@gmail.com",
+    "EMAIL_SUBJECT": "NICEHASH"
   },
   "RIG_HOSTNAMES": [
   "my_rig_1",
