@@ -1,6 +1,6 @@
 from time import sleep, time
 
-from conf import logger
+from conf import logger, c
 from nicehash_api_client import NiceHashClient
 from utils import send_email_notification, get_btc_usd_rate
 
@@ -77,9 +77,9 @@ def run_monitoring_tool():
             unpaid_balance_fiat_list.append(unpaid_balance_fiat)
 
         if (time() - last_balance_reporting_time) > interval_between_balance_reporting_sec:
-            c = ', '.join(['{0:.2f} {1}'.format(u, v) for (u, v) in zip(unpaid_balance_fiat_list, ref_fiat_currencies)])
-            c = 'Your unpaid balance is now {0:.8f} BTC ({1} approx).'.format(unpaid_balance_btc, c)
-            email_sender.send_email(email_content=c)
+            d = ', '.join(['{0:.2f} {1}'.format(u, v) for (u, v) in zip(unpaid_balance_fiat_list, ref_fiat_currencies)])
+            d = 'Your unpaid balance is now {0:.8f} BTC ({1} approx).'.format(unpaid_balance_btc, d)
+            email_sender.send_email(email_content=d)
             last_balance_reporting_time = time()
 
         logger.debug('Going to sleep for {} seconds.'.format(polling_interval_sec))
