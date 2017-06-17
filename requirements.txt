@@ -1,0 +1,4 @@
+forex_python==0.3.2
+mailthon==0.1.1
+namedtupled==0.3.3
+requests==2.14.1
