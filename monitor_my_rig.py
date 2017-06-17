@@ -70,7 +70,7 @@ def run_monitoring_tool():
 
         if (time() - last_balance_reporting_time) > interval_between_balance_reporting_sec:
             email_sender.send_email(email_subject='Unpaid Balance',
-                                    email_content='Your unpaid balance is now {0} BTC ({1:.2f} {2} approx).'.format(
+                                    email_content='Your unpaid balance is now {0:.8f} BTC ({1:.2f} {2} approx).'.format(
                                         unpaid_balance_btc, unpaid_balance_fiat, ref_fiat_currency))
             last_balance_reporting_time = time()
 
