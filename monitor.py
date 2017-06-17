@@ -1,6 +1,6 @@
 from time import sleep, time
 
-from conf import c, logger
+from conf import logger
 from nicehash_api_client import NiceHashClient
 from utils import send_email_notification, get_btc_usd_rate
 
@@ -36,7 +36,6 @@ def run_monitoring_tool():
     rig_statuses = list(previous_rig_statuses)
 
     # part balance
-    ref_fiat_currency = c.REFERENCE_FIAT_CURRENCY
     interval_between_balance_reporting_sec = 60 * 60 * 4  # in seconds
     last_balance_reporting_time = 0
 
@@ -64,13 +63,23 @@ def run_monitoring_tool():
         previous_rig_statuses = list(rig_statuses)
 
         # PART BALANCE
+        ref_fiat_currencies = c.REFERENCE_FIAT_CURRENCY
+        if ',' in ref_fiat_currencies:
+            ref_fiat_currencies = ref_fiat_currencies.split(',')
+        else:
+            ref_fiat_currencies = [ref_fiat_currencies]
+
         unpaid_balance_btc = nice_hash_client.get_unpaid_balance_btc()
-        price_for_one_btc_in_fiat_currency = get_btc_usd_rate(ref_fiat_currency)
-        unpaid_balance_fiat = unpaid_balance_btc * price_for_one_btc_in_fiat_currency
+        unpaid_balance_fiat_list = list()
+        for ref_fiat_currency in ref_fiat_currencies:
+            price_for_one_btc_in_fiat_currency = get_btc_usd_rate(ref_fiat_currency)
+            unpaid_balance_fiat = unpaid_balance_btc * price_for_one_btc_in_fiat_currency
+            unpaid_balance_fiat_list.append(unpaid_balance_fiat)
 
         if (time() - last_balance_reporting_time) > interval_between_balance_reporting_sec:
-            email_sender.send_email(email_content='Your unpaid balance is now {0:.8f} BTC ({1:.2f} {2} approx).'.format(
-                unpaid_balance_btc, unpaid_balance_fiat, ref_fiat_currency))
+            c = ', '.join(['{0:.2f} {1}'.format(u, v) for (u, v) in zip(unpaid_balance_fiat_list, ref_fiat_currencies)])
+            c = 'Your unpaid balance is now {0:.8f} BTC ({1} approx).'.format(unpaid_balance_btc, c)
+            email_sender.send_email(email_content=c)
             last_balance_reporting_time = time()
 
         logger.debug('Going to sleep for {} seconds.'.format(polling_interval_sec))

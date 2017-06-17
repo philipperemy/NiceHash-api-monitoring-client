@@ -16,4 +16,8 @@ def send_email_notification(gmail_user, gmail_password, target_email, email_cont
 
 def get_btc_usd_rate(currency):
     b = BtcConverter()
-    return b.get_latest_price(currency)
+    return b.get_latest_price(currency.strip())
+
+
+if __name__ == '__main__':
+    print(get_btc_usd_rate('JPY'))
