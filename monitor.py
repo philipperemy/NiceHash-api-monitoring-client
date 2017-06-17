@@ -63,20 +63,22 @@ def run_monitoring_tool():
         previous_rig_statuses = list(rig_statuses)
 
         # PART BALANCE
-        ref_fiat_currencies = c.REFERENCE_FIAT_CURRENCY
-        if ',' in ref_fiat_currencies:
-            ref_fiat_currencies = ref_fiat_currencies.split(',')
-        else:
-            ref_fiat_currencies = [ref_fiat_currencies]
-
-        unpaid_balance_btc = nice_hash_client.get_unpaid_balance_btc()
-        unpaid_balance_fiat_list = list()
-        for ref_fiat_currency in ref_fiat_currencies:
-            price_for_one_btc_in_fiat_currency = get_btc_usd_rate(ref_fiat_currency)
-            unpaid_balance_fiat = unpaid_balance_btc * price_for_one_btc_in_fiat_currency
-            unpaid_balance_fiat_list.append(unpaid_balance_fiat)
-
         if (time() - last_balance_reporting_time) > interval_between_balance_reporting_sec:
+            ref_fiat_currencies = c.REFERENCE_FIAT_CURRENCY
+            if ',' in ref_fiat_currencies:
+                ref_fiat_currencies = ref_fiat_currencies.split(',')
+            else:
+                ref_fiat_currencies = [ref_fiat_currencies]
+
+            unpaid_balance_btc = nice_hash_client.get_unpaid_balance_btc()
+            unpaid_balance_fiat_list = list()
+            for ref_fiat_currency in ref_fiat_currencies:
+                price_for_one_btc_in_fiat_currency = get_btc_usd_rate(ref_fiat_currency)
+                if price_for_one_btc_in_fiat_currency is None:
+                    price_for_one_btc_in_fiat_currency = -1.0
+                unpaid_balance_fiat = unpaid_balance_btc * price_for_one_btc_in_fiat_currency
+                unpaid_balance_fiat_list.append(unpaid_balance_fiat)
+
             d = ', '.join(['{0:.2f} {1}'.format(u, v) for (u, v) in zip(unpaid_balance_fiat_list, ref_fiat_currencies)])
             d = 'Your unpaid balance is now {0:.8f} BTC ({1} approx).'.format(unpaid_balance_btc, d)
             email_sender.send_email(email_content=d)
