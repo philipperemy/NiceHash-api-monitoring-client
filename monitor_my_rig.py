@@ -29,8 +29,8 @@ def run_monitoring_tool():
     nice_hash_client = NiceHashClient(addr)
     polling_interval_sec = 60  # 1 minute
     rig_names_to_monitor = c.RIG_HOSTNAMES
-    previous_rig_statuses = [True] * len(rig_names_to_monitor)  # all online by default.
-    rig_statuses = list(previous_rig_statuses)  # deep copy.
+    previous_rig_statuses = [True] * len(rig_names_to_monitor)  # initial statuses
+    rig_statuses = list(previous_rig_statuses)
 
     while True:
         logger.debug('run_monitoring_tool() - RUNNING')
