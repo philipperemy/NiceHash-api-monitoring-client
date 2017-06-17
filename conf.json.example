@@ -9,5 +9,6 @@
   "my_rig_2",
   "my_rig_3"
   ],
-  "BITCOIN_WALLET_PUBLIC_ID": "your_public_bitcoin_wallet_key_on_nice_hash"
+  "BITCOIN_WALLET_PUBLIC_ID": "your_public_bitcoin_wallet_key_on_nice_hash",
+  "REFERENCE_FIAT_CURRENCY": "USD"
 }

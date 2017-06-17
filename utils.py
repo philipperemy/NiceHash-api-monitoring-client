@@ -1,3 +1,4 @@
+from forex_python.bitcoin import BtcConverter
 from mailthon import postman, email
 
 
@@ -11,3 +12,8 @@ def send_email_notification(gmail_user, gmail_password, target_email, email_cont
         receivers=[target_email],
     ))
     assert r.ok
+
+
+def get_btc_usd_rate(currency):
+    b = BtcConverter()
+    return b.get_latest_price(currency)
