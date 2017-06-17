@@ -1,0 +1,13 @@
+{
+  "MAIL": {
+    "GMAIL_USERNAME": "steve.jobs",
+  "GMAIL_PASSWORD": "iloveapple",
+  "NOTIFICATION_EMAIL": "steve.jobs@gmail.com"
+  },
+  "RIG_HOSTNAMES": [
+  "my_rig_1",
+  "my_rig_2",
+  "my_rig_3"
+  ],
+  "BITCOIN_WALLET_PUBLIC_ID": "your_public_bitcoin_wallet_key_on_nice_hash"
+}
