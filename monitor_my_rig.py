@@ -28,7 +28,7 @@ def run_monitoring_tool():
     # part online - offline
     addr = c.BITCOIN_WALLET_PUBLIC_ID
     nice_hash_client = NiceHashClient(addr)
-    polling_interval_sec = 1  # 1 minute
+    polling_interval_sec = 60  # 1 minute
     rig_names_to_monitor = c.RIG_HOSTNAMES
     previous_rig_statuses = [True] * len(rig_names_to_monitor)  # initial statuses
     rig_statuses = list(previous_rig_statuses)
