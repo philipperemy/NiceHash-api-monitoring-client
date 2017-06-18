@@ -41,49 +41,52 @@ def run_monitoring_tool():
 
     while True:
         logger.debug('run_monitoring_tool() - RUNNING')
+        try:
+            # PART ONLINE - OFFLINE INSPECTION
+            rig_names, speeds, up_time_minutes, locations, algo_ids = nice_hash_client.get_mining_rigs()
+            connected_rig_names = set(rig_names)
 
-        # PART ONLINE - OFFLINE INSPECTION
-        rig_names, speeds, up_time_minutes, locations, algo_ids = nice_hash_client.get_mining_rigs()
-        connected_rig_names = set(rig_names)
+            for i, rig_name_to_monitor in enumerate(rig_names_to_monitor):
+                if rig_name_to_monitor not in connected_rig_names:
+                    logger.debug('{} is down.'.format(rig_name_to_monitor))
+                    rig_statuses[i] = False
+                    if previous_rig_statuses[i] is True:
+                        email_sender.send_email(email_content='[{}] host is down. Please check.'.format(
+                            rig_name_to_monitor))
+                else:
+                    logger.debug('{} is connected.'.format(rig_name_to_monitor))
+                    rig_statuses[i] = True
+                    if previous_rig_statuses[i] is False:
+                        email_sender.send_email(email_content='[{}] host successfully connected.'.format(
+                            rig_name_to_monitor))
 
-        for i, rig_name_to_monitor in enumerate(rig_names_to_monitor):
-            if rig_name_to_monitor not in connected_rig_names:
-                logger.debug('{} is down.'.format(rig_name_to_monitor))
-                rig_statuses[i] = False
-                if previous_rig_statuses[i] is True:
-                    email_sender.send_email(email_content='[{}] host is down. Please check.'.format(
-                        rig_name_to_monitor))
-            else:
-                logger.debug('{} is connected.'.format(rig_name_to_monitor))
-                rig_statuses[i] = True
-                if previous_rig_statuses[i] is False:
-                    email_sender.send_email(email_content='[{}] host successfully connected.'.format(
-                        rig_name_to_monitor))
+            previous_rig_statuses = list(rig_statuses)
 
-        previous_rig_statuses = list(rig_statuses)
+            # PART BALANCE
+            if (time() - last_balance_reporting_time) > interval_between_balance_reporting_sec:
+                ref_fiat_currencies = c.REFERENCE_FIAT_CURRENCY
+                if ',' in ref_fiat_currencies:
+                    ref_fiat_currencies = ref_fiat_currencies.split(',')
+                else:
+                    ref_fiat_currencies = [ref_fiat_currencies]
 
-        # PART BALANCE
-        if (time() - last_balance_reporting_time) > interval_between_balance_reporting_sec:
-            ref_fiat_currencies = c.REFERENCE_FIAT_CURRENCY
-            if ',' in ref_fiat_currencies:
-                ref_fiat_currencies = ref_fiat_currencies.split(',')
-            else:
-                ref_fiat_currencies = [ref_fiat_currencies]
+                unpaid_balance_btc = nice_hash_client.get_unpaid_balance_btc()
+                unpaid_balance_fiat_list = list()
+                for ref_fiat_currency in ref_fiat_currencies:
+                    price_for_one_btc_in_fiat_currency = get_btc_usd_rate(ref_fiat_currency)
+                    if price_for_one_btc_in_fiat_currency is None:
+                        price_for_one_btc_in_fiat_currency = -1.0
+                    unpaid_balance_fiat = unpaid_balance_btc * price_for_one_btc_in_fiat_currency
+                    unpaid_balance_fiat_list.append(unpaid_balance_fiat)
 
-            unpaid_balance_btc = nice_hash_client.get_unpaid_balance_btc()
-            unpaid_balance_fiat_list = list()
-            for ref_fiat_currency in ref_fiat_currencies:
-                price_for_one_btc_in_fiat_currency = get_btc_usd_rate(ref_fiat_currency)
-                if price_for_one_btc_in_fiat_currency is None:
-                    price_for_one_btc_in_fiat_currency = -1.0
-                unpaid_balance_fiat = unpaid_balance_btc * price_for_one_btc_in_fiat_currency
-                unpaid_balance_fiat_list.append(unpaid_balance_fiat)
+                d = ', '.join(
+                    ['{0:.2f} {1}'.format(u, v) for (u, v) in zip(unpaid_balance_fiat_list, ref_fiat_currencies)])
+                d = 'Your unpaid balance is now {0:.8f} BTC ({1} approx).'.format(unpaid_balance_btc, d)
+                email_sender.send_email(email_content=d)
+                last_balance_reporting_time = time()
 
-            d = ', '.join(['{0:.2f} {1}'.format(u, v) for (u, v) in zip(unpaid_balance_fiat_list, ref_fiat_currencies)])
-            d = 'Your unpaid balance is now {0:.8f} BTC ({1} approx).'.format(unpaid_balance_btc, d)
-            email_sender.send_email(email_content=d)
-            last_balance_reporting_time = time()
-
+        except Exception as e:
+            logger.error(e)
         logger.debug('Going to sleep for {} seconds.'.format(polling_interval_sec))
         sleep(polling_interval_sec)
 
